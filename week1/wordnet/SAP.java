@@ -20,17 +20,16 @@ public class SAP {
 
     // length of shortest ancestral path between v and w; -1 if no such path
     public int length(int v, int w) {
-        reset();
-        Queue<Integer> qv = new Queue<>();
-        qv.enqueue(v);
-        bfs(qv, distFromV);
+        if (v < 0 || v >= digraph.V())
+        {
+            throw new java.lang.IllegalArgumentException("Vertex " + v + " is not in range.");
+        }
+        if (w < 0 || w >= digraph.V())
+        {
+            throw new java.lang.IllegalArgumentException("Vertex " + w + " is not in range.");
+        }
 
-        Queue<Integer> qw = new Queue<>();
-        qw.enqueue(w);
-
-        bfs(qw, distFromW);
-
-        int ancestor = getAncestor();
+        int ancestor = ancestor(v, w);
         if (ancestor != -1) {
             return distFromV[ancestor] + distFromW[ancestor];
         }
@@ -40,6 +39,15 @@ public class SAP {
 
     // a common ancestor of v and w that participates in a shortest ancestral path; -1 if no such path
     public int ancestor(int v, int w) {
+        if (v < 0 || v >= digraph.V())
+        {
+            throw new java.lang.IllegalArgumentException("Vertex " + v + " is not in range.");
+        }
+        if (w < 0 || w >= digraph.V())
+        {
+            throw new java.lang.IllegalArgumentException("Vertex " + w + " is not in range.");
+        }
+
         reset();
 
         Queue<Integer> qv = new Queue<>();
@@ -56,18 +64,7 @@ public class SAP {
 
     // length of shortest ancestral path between any vertex in v and any vertex in w; -1 if no such path
     public int length(Iterable<Integer> v, Iterable<Integer> w) {
-        if(v == null)
-        {
-            throw new java.lang.IllegalArgumentException("First Iterable argument is null.");
-        }
-        if(w == null)
-        {
-            throw new java.lang.IllegalArgumentException("Second Iterable argument is null.");
-        }
-        reset();
-        bfs(v, distFromV);
-        bfs(w, distFromW);
-        int ancestor = getAncestor();
+        int ancestor = ancestor(v, w);
         if (ancestor != -1) {
             return distFromV[ancestor] + distFromW[ancestor];
         }
