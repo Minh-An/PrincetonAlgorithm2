@@ -9,7 +9,7 @@ public class BaseballElimination {
     private int[] remaining;
     private int[][] games;
 
-    private Queue[] certificates;
+    private SeparateChainingHashST<String, Queue<String>> certificates;
 
     // create a baseball division from given filename in format specified below
     public BaseballElimination(String filename) {
@@ -22,7 +22,7 @@ public class BaseballElimination {
             remaining = new int[numTeams];
             games = new int[numTeams][numTeams];
             teams = new SeparateChainingHashST<>();
-            certificates = new Queue[numTeams];
+            certificates = new SeparateChainingHashST<>();
 
             int max = 0;
             for (int i = 0; i < numTeams; i++) {
@@ -92,7 +92,7 @@ public class BaseballElimination {
         String trivial = trivialCase(wins[x] + remaining[x]);
         if (trivial != null) {
             certificate.enqueue(trivial);
-            certificates[x] = certificate;
+            certificates.put(team, certificate);
             return true;
         }
 
@@ -128,7 +128,7 @@ public class BaseballElimination {
             for (String t : teams.keys()) {
                 if (elimination.inCut(offset + teams.get(t))) {
                     certificate.enqueue(t);
-                    certificates[x] = certificate;
+                    certificates.put(team, certificate);
                 }
             }
             return true;
@@ -151,11 +151,10 @@ public class BaseballElimination {
             throw new IllegalArgumentException("Illegal team name.");
         }
 
-        int x = teams.get(team);
-        if (certificates[x] == null) {
+        if (certificates.get(team) == null) {
             isEliminated(team);
         }
-        return certificates[x];
+        return certificates.get(team);
     }
 
     public static void main(String[] args) {
