@@ -1,14 +1,14 @@
 import edu.princeton.cs.algs4.*;
 import edu.princeton.cs.algs4.Queue;
-import edu.princeton.cs.algs4.Stack;
+
 
 public class BoggleSolver {
-    private TST<Boolean> dict;
+    private MyTST<Boolean> dict;
 
     // Initializes the data structure using the given array of strings as the dictionary.
     // (You can assume each word in the dictionary contains only the uppercase letters A through Z.)
     public BoggleSolver(String[] dictionary) {
-        dict = new TST<>();
+        dict = new MyTST<>();
         for (int i = 0; i < dictionary.length; i++) {
             dict.put(dictionary[i], true);
         }
@@ -20,8 +20,8 @@ public class BoggleSolver {
         return dfs(board, adj);
     }
 
-    private Queue<String> dfs(BoggleBoard board, SeparateChainingHashST<Integer, Queue<Integer>> adj) {
-        Queue<String> validWords = new Queue<>();
+    private SET<String> dfs(BoggleBoard board, SeparateChainingHashST<Integer, Queue<Integer>> adj) {
+        SET<String> validWords = new SET<>();
         int tiles = board.rows() * board.cols();
         for (int v = 0; v < tiles; v++) {
             boolean[] marked = new boolean[tiles];
@@ -32,44 +32,55 @@ public class BoggleSolver {
     }
 
     private void dfs(BoggleBoard board, int v, StringBuilder prefix, boolean[] marked,
-                     SeparateChainingHashST<Integer, Queue<Integer>> adj, Queue<String> validWords) {
+                     SeparateChainingHashST<Integer, Queue<Integer>> adj, SET<String> validWords) {
         marked[v] = true;
         int row = v / board.cols();
         int col = v % board.cols();
-        prefix.append(board.getLetter(row, col));
-        StdOut.println(prefix.toString());
-        if(dict.get(prefix.toString()) != null)
-        {
 
-            validWords.enqueue(prefix.toString());
+        if(board.getLetter(row, col) == 'Q')
+        {
+            prefix.append("QU");
+        }
+        else {
+            prefix.append(board.getLetter(row, col));
+        }
+        if(dict.contains(prefix.toString()) && prefix.length() > 2)
+        {
+            validWords.add(prefix.toString());
         }
 
-        for(String s : dict.keysWithPrefix(prefix.toString())) {
+        if(dict.hasPrefix(prefix.toString())) {
             for (int w : adj.get(v)) {
                 if (!marked[w]) {
                     dfs(board, w, prefix, marked, adj, validWords);
-                    marked[v] = false;
+                    prefix.deleteCharAt(prefix.length()-1);
+                    if(prefix.charAt(prefix.length()-1) == 'Q')
+                    {
+                        prefix.deleteCharAt(prefix.length()-1);
+                    }
+                    marked[w] = false;
                 }
             }
-            break;
         }
     }
 
     // Returns the score of the given word if it is in the dictionary, zero otherwise.
     // (You can assume the word contains only the uppercase letters A through Z.)
     public int scoreOf(String word) {
-        int n = word.length();
-        if (dict.get(word) && n > 2) {
-            if (n >= 8) {
-                return 11;
-            }
-            if (n == 7) {
-                return 5;
-            }
-            if (n == 3) {
-                return 1;
-            } else {
-                return n - 3;
+        if(dict.contains(word)) {
+            int n = word.length();
+            if (dict.get(word) && n > 2) {
+                if (n >= 8) {
+                    return 11;
+                }
+                if (n == 7) {
+                    return 5;
+                }
+                if (n == 3) {
+                    return 1;
+                } else {
+                    return n - 3;
+                }
             }
         }
         return 0;
@@ -80,6 +91,9 @@ public class BoggleSolver {
         String[] dictionary = in.readAllStrings();
         BoggleSolver solver = new BoggleSolver(dictionary);
         BoggleBoard board = new BoggleBoard(args[1]);
+
+        StdOut.println( board.toString());
+
         int score = 0;
         for (String word : solver.getAllValidWords(board)) {
             StdOut.println(word);
